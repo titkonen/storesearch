@@ -1,35 +1,27 @@
-//
-//  ViewController.swift
-//  StoreSearch
-//
-//  Created by Toni Itkonen on 20/05/2019.
-//  Copyright © 2019 Toni Itkonen. All rights reserved.
-//
-
 import UIKit
 
 class SearchViewController: UIViewController {
 
-    // Properties
+    // MARK: - Properties
     var searchResults = [SearchResult]()
     var hasSearched = false
     var isLoading = false
     var dataTask: URLSessionDataTask?
     
     
-    // Outlets
+    // MARK: - Outlets
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     
-    // Actions
+    // MARK: - Actions
     @IBAction func segmentChanged(_ sender: UISegmentedControl) {
         performSearch()
     }
     
     
-    // View Did load
+    // MARK: - Overrides
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +43,18 @@ class SearchViewController: UIViewController {
         tableView.register(cellNib, forCellReuseIdentifier: TableView.CellIdentifiers.loadingCell) // p.876
     }
     
-    // Struct
+    // MARK: - Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowDetail" {
+            let detailViewController = segue.destination as! DetailViewController
+            let indexPath = sender as! IndexPath
+            let searchResult = searchResults[indexPath.row]
+            detailViewController.searchResult = searchResult
+        }
+    }
+    
+    // MARK: - Struct
     
     struct TableView {
         struct CellIdentifiers {
@@ -61,7 +64,7 @@ class SearchViewController: UIViewController {
         }
     }
     
-    // Functions
+    // MARK: - Functions
     
     // MARK:- Helper Methods
     func iTunesURL(searchText: String, category: Int) -> URL {
@@ -109,6 +112,7 @@ class SearchViewController: UIViewController {
     
 } // End of the class
 
+// MARK: - Extensions
 extension SearchViewController: UISearchBarDelegate {
     // Moves SearchBar to the top of the UIView.
     func position(for bar: UIBarPositioning) -> UIBarPosition {
