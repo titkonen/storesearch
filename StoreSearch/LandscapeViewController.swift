@@ -9,15 +9,16 @@
 import UIKit
 
 class LandscapeViewController: UIViewController {
-
-    // MARK: - Properties
     var searchResults = [SearchResult]()
-    private var firstTime = true
     
     // MARK: - Outlets
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var pageControl: UIPageControl!
 
+    // MARK: - Properties
+    private var firstTime = true
+    private var downloads = [URLSessionDownloadTask]()
+    
     // MARK: - Actions
     @IBAction func pageChanged(_ sender: UIPageControl) {
         UIView.animate(withDuration: 0.3, delay: 0,
@@ -31,20 +32,17 @@ class LandscapeViewController: UIViewController {
     // MARK: - Overrides
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(patternImage: UIImage(named: "LandscapeBackground")!)
         // Remove constraints from the main view
         view.removeConstraints(view.constraints)
         view.translatesAutoresizingMaskIntoConstraints = true
         // Remove constraints for page control
         pageControl.removeConstraints(pageControl.constraints)
         pageControl.translatesAutoresizingMaskIntoConstraints = true
+        pageControl.numberOfPages = 0
         // Remove constraints for scroll view
         scrollView.removeConstraints(scrollView.constraints)
         scrollView.translatesAutoresizingMaskIntoConstraints = true
-        
-        view.backgroundColor = UIColor(patternImage: UIImage(named: "LandscapeBackground")!)
-        
-        pageControl.numberOfPages = 0
-        
     }
     
     override func viewWillLayoutSubviews() {
@@ -59,7 +57,13 @@ class LandscapeViewController: UIViewController {
             firstTime = false
             tileButtons(searchResults)
         }
-        
+    }
+    
+    deinit {
+        print("deinit \(self)")
+        for task in downloads {
+            task.cancel()
+        }
     }
     
     // MARK: - Private methods
@@ -114,11 +118,13 @@ class LandscapeViewController: UIViewController {
         var row = 0
         var column = 0
         var x = marginX
-        for (index, result) in searchResults.enumerated() {
+        for (_, result) in searchResults.enumerated() { // index
             // 1
-            let button = UIButton(type: .system)
-            button.backgroundColor = UIColor.white
-            button.setTitle("\(index)", for: .normal)
+            let button = UIButton(type: .custom)
+            
+            button.setBackgroundImage(UIImage(named: "LandscapeButton"), for: .normal)
+            downloadImage(for: result, andPlaceOn: button)
+            
             // 2
             button.frame = CGRect(x: x + paddingHorz,
                                   y: marginY + CGFloat(row)*itemHeight + paddingVert,
@@ -147,6 +153,26 @@ class LandscapeViewController: UIViewController {
         pageControl.numberOfPages = numPages
         pageControl.currentPage = 0
         
+    }
+    
+    private func downloadImage(for searchResult: SearchResult, andPlaceOn button: UIButton) {
+        if let url = URL(string: searchResult.imageSmall) {
+            let task = URLSession.shared.downloadTask(with: url) {
+                [weak button] url, response, error in
+                
+                if error == nil, let url = url,
+                    let data = try? Data(contentsOf: url),
+                    let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        if let button = button {
+                            button.setImage(image, for: .normal)
+                        }
+                    }
+                }
+            }
+                task.resume()
+                downloads.append(task)
+        }
     }
    
 } // End of class
