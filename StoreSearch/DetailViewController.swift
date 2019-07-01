@@ -36,6 +36,7 @@ class DetailViewController: UIViewController {
     
     // MARK: - Actions
     @IBAction func close() {
+        dismissStyle = .slide
         dismiss(animated: true, completion: nil)
     }
     
@@ -106,6 +107,14 @@ class DetailViewController: UIViewController {
         modalPresentationStyle = .custom
         transitioningDelegate = self
     }
+    
+    // MARK: - Enum animation
+    enum animationStyle {
+        case slide
+        case fade
+    }
+    
+    var dismissStyle = animationStyle.fade
 
 }
 // MARK: - Extensions
@@ -122,7 +131,13 @@ extension DetailViewController: UIViewControllerTransitioningDelegate {
     }
     
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return SlideOutAnimationController()
+        
+        switch dismissStyle {
+        case .slide:
+            return SlideOutAnimationController()
+        case .fade:
+            return FadeOutAnimationController()
+        }
     }
     
 }
