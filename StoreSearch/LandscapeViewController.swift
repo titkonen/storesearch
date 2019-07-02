@@ -9,7 +9,7 @@
 import UIKit
 
 class LandscapeViewController: UIViewController {
-    var searchResults = [SearchResult]()
+    var search: Search!
     
     // MARK: - Outlets
     @IBOutlet weak var scrollView: UIScrollView!
@@ -55,7 +55,7 @@ class LandscapeViewController: UIViewController {
         
         if firstTime {
             firstTime = false
-            tileButtons(searchResults)
+            tileButtons(search.searchResults)
         }
     }
     
