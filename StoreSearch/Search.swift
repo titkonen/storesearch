@@ -36,6 +36,7 @@ class Search {
     func performSearch(for text: String, category: Category, completion: @escaping SearchComplete) {
         if !text.isEmpty {
             dataTask?.cancel()
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
             
             state = .loading
             
@@ -67,6 +68,7 @@ class Search {
                 DispatchQueue.main.async {
                     self.state = newState
                     completion(success)
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
             })
             dataTask?.resume()
